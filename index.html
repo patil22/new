@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- head  -->
+    <title>Movieeeeeeeee Search</title>
+    <script src="script.js"></script>
+  </head>
+  <body>
+    <h1>Movie Search:</h1>
+    <h1>sssssss</h1>
+    <input type="text" id="movie-search-input" placeholder="Enter movie name" />
+    <button onclick="searchMovie()">Search</button>
+
+    <div id="movie-details"></div>
+    <div id="movie-video"></div>
+    <script>
+      const apiKey = "400f4f371fbae51cac90614400d68895"; // Replace with your TMDB API key
+
+      function searchMovie() {
+        const movieName = document.getElementById("movie-search-input").value;
+        const searchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(
+          movieName
+        )}`;
+
+        fetch(searchUrl)
+          .then((response) => response.json())
+          .then((searchResults) => {
+            if (searchResults.results.length > 0) {
+              const movieId = searchResults.results[0].id; // Get the ID of the first search result
+              const detailsUrl = `https://api.themoviedb.org/3/movie/${movieId}?api_key=${apiKey}`;
+              const videosUrl = `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${apiKey}`;
+
+              // Fetch movie details
+              fetch(detailsUrl)
+                .then((response) => response.json())
+                .then((movieData) => {
+                  const movieDetailsElement =
+                    document.getElementById("movie-details");
+                  movieDetailsElement.innerHTML = `
+              <p>Title: ${movieData.title}</p>
+              <p>Overview: ${movieData.overview}</p>
+              <p>Release Date: ${movieData.release_date}</p>
+              <p>Popularity: ${movieData.popularity}</p>
+            `;
+
+                  // Fetch movie videos
+                  fetch(videosUrl)
+                    .then((response) => response.json())
+                    .then((videosData) => {
+                      const movieVideoElement =
+                        document.getElementById("movie-video");
+                      if (videosData.results.length > 0) {
+                        const videoKey = videosData.results[0].key; // Get the key of the first video
+                        const videoUrl = `https://www.youtube.com/watch?v=${videoKey}`;
+
+                        movieVideoElement.innerHTML = `
+                    <h2>Movie Video:</h2>
+                    <iframe width="560" height="315" src="https://www.youtube.com/embed/${videoKey}" frameborder="0" allowfullscreen></iframe>
+                  `;
+                      } else {
+                        movieVideoElement.innerHTML =
+                          "<p>No video found for this movie.</p>";
+                      }
+                    })
+                    .catch((error) => {
+                      console.error("Error:", error);
+                    });
+                })
+                .catch((error) => {
+                  console.error("Error:", error);
+                });
+            } else {
+              const movieDetailsElement =
+                document.getElementById("movie-details");
+              movieDetailsElement.innerHTML =
+                "<p>No movie found with that name.</p>";
+              const movieVideoElement = document.getElementById("movie-video");
+              movieVideoElement.innerHTML = "";
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }
+    </script>
+  </body>
+</html>
